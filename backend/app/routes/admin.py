@@ -44,6 +44,27 @@ async def get_all_users(
     return [UserResponse.model_validate(u) for u in users]
 
 
+@router.delete("/users/{user_id}")
+async def delete_user(
+    user_id: int,
+    current_user: User = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a user (admin only)."""
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.is_admin:
+        raise HTTPException(status_code=400, detail="Cannot delete admin user")
+    
+    await db.delete(user)
+    await db.commit()
+    return {"message": "User deleted successfully"}
+
+
 @router.put("/users/{user_id}/toggle-active")
 async def toggle_user_active(
     user_id: int,

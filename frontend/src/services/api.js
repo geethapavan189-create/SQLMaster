@@ -82,6 +82,7 @@ export const adminAPI = {
   getStats: () => api.get('/admin/stats'),
   getUsers: () => api.get('/admin/users'),
   toggleUser: (id) => api.put(`/admin/users/${id}/toggle-active`),
+  deleteUser: (id) => api.delete(`/admin/users/${id}`),
   deleteLesson: (id) => api.delete(`/admin/lessons/${id}`),
 };
 
