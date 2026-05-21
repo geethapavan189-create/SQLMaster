@@ -1,28 +1,28 @@
 import { useEffect, useRef } from 'react';
 
-export default function AdBanner({ slot, format = 'auto', className = '' }) {
+export default function AdBanner({ format = 'auto', className = '' }) {
   const adRef = useRef(null);
   const pushed = useRef(false);
 
   useEffect(() => {
-    if (!pushed.current && window.adsbygoogle && adRef.current) {
+    if (!pushed.current && adRef.current) {
       try {
-        window.adsbygoogle.push({});
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
         pushed.current = true;
       } catch (e) {
-        console.log('Ad error:', e);
+        // Ad blocked or not loaded
       }
     }
   }, []);
 
   return (
-    <div className={`ad-container my-6 ${className}`}>
+    <div className={`ad-container my-6 overflow-hidden ${className}`}>
       <ins
         ref={adRef}
         className="adsbygoogle"
         style={{ display: 'block' }}
         data-ad-client="ca-pub-3895650459235192"
-        data-ad-slot={slot}
+        data-ad-slot="auto"
         data-ad-format={format}
         data-full-width-responsive="true"
       />
