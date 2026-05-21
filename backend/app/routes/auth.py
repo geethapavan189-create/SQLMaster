@@ -98,9 +98,13 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     db.add(user)
     await db.flush()
     
-    # Create progress record
-    progress = UserProgress(user_id=user.id)
-    db.add(progress)
+    # Create progress record (check if exists first)
+    existing_progress = await db.execute(
+        select(UserProgress).where(UserProgress.user_id == user.id)
+    )
+    if not existing_progress.scalar_one_or_none():
+        progress = UserProgress(user_id=user.id)
+        db.add(progress)
     await db.commit()
     await db.refresh(user)
     

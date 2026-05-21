@@ -1,13 +1,15 @@
 """Admin routes."""
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, delete
 from typing import List
 from app.database.session import get_db
 from app.models.user import User
-from app.models.lesson import Lesson
-from app.models.quiz import Quiz, QuizQuestion
-from app.models.problem import Problem
+from app.models.lesson import Lesson, LessonProgress
+from app.models.quiz import Quiz, QuizQuestion, QuizAttempt
+from app.models.problem import Problem, ProblemSubmission
+from app.models.progress import UserProgress, UserAchievement
+from app.models.challenge import ChallengeSubmission
 from app.schemas.user import UserResponse
 from app.middleware.auth import get_current_admin
 
@@ -50,7 +52,7 @@ async def delete_user(
     current_user: User = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    """Delete a user (admin only)."""
+    """Delete a user and all their data (admin only)."""
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     
@@ -60,6 +62,15 @@ async def delete_user(
     if user.is_admin:
         raise HTTPException(status_code=400, detail="Cannot delete admin user")
     
+    # Delete all related records
+    await db.execute(delete(UserProgress).where(UserProgress.user_id == user_id))
+    await db.execute(delete(UserAchievement).where(UserAchievement.user_id == user_id))
+    await db.execute(delete(LessonProgress).where(LessonProgress.user_id == user_id))
+    await db.execute(delete(QuizAttempt).where(QuizAttempt.user_id == user_id))
+    await db.execute(delete(ProblemSubmission).where(ProblemSubmission.user_id == user_id))
+    await db.execute(delete(ChallengeSubmission).where(ChallengeSubmission.user_id == user_id))
+    
+    # Delete the user
     await db.delete(user)
     return {"message": "User deleted successfully"}
 
