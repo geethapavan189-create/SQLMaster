@@ -61,7 +61,6 @@ async def delete_user(
         raise HTTPException(status_code=400, detail="Cannot delete admin user")
     
     await db.delete(user)
-    await db.commit()
     return {"message": "User deleted successfully"}
 
 
