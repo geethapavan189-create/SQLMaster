@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import { Database, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -9,7 +10,7 @@ export default function Register() {
   const [formData, setFormData] = useState({ username: '', email: '', password: '', full_name: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, googleLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -21,12 +22,22 @@ export default function Register() {
     setLoading(true);
     try {
       await register(formData.username, formData.email, formData.password, formData.full_name);
-      toast.success('Account created! Welcome to SQLMaster!');
+      toast.success('Account created!');
       navigate('/dashboard');
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Registration failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (response) => {
+    try {
+      await googleLogin(response.credential);
+      toast.success('Welcome!');
+      navigate('/dashboard');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Google signup failed');
     }
   };
 
@@ -50,91 +61,64 @@ export default function Register() {
             <p className="text-gray-400 mt-1">Start your SQL learning journey</p>
           </div>
 
+          {/* Google Sign Up */}
+          <div className="flex justify-center mb-6">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error('Google signup failed')}
+              theme="filled_black"
+              shape="pill"
+              size="large"
+              text="signup_with"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex-1 h-px bg-dark-700"></div>
+            <span className="text-xs text-gray-500">or</span>
+            <div className="flex-1 h-px bg-dark-700"></div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm text-gray-400 mb-1">Full Name</label>
               <div className="relative">
                 <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                <input
-                  type="text"
-                  value={formData.full_name}
-                  onChange={(e) => setFormData({...formData, full_name: e.target.value})}
-                  className="input-field pl-10"
-                  placeholder="John Doe"
-                />
+                <input type="text" value={formData.full_name} onChange={(e) => setFormData({...formData, full_name: e.target.value})} className="input-field pl-10" placeholder="John Doe" />
               </div>
             </div>
-
             <div>
               <label className="block text-sm text-gray-400 mb-1">Username</label>
               <div className="relative">
                 <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                <input
-                  type="text"
-                  value={formData.username}
-                  onChange={(e) => setFormData({...formData, username: e.target.value})}
-                  className="input-field pl-10"
-                  placeholder="johndoe"
-                  required
-                />
+                <input type="text" value={formData.username} onChange={(e) => setFormData({...formData, username: e.target.value})} className="input-field pl-10" placeholder="johndoe" required />
               </div>
             </div>
-
             <div>
               <label className="block text-sm text-gray-400 mb-1">Email</label>
               <div className="relative">
                 <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="input-field pl-10"
-                  placeholder="you@example.com"
-                  required
-                />
+                <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="input-field pl-10" placeholder="you@example.com" required />
               </div>
             </div>
-
             <div>
               <label className="block text-sm text-gray-400 mb-1">Password</label>
               <div className="relative">
                 <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="input-field pl-10 pr-10"
-                  placeholder="••••••••"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
-                >
+                <input type={showPassword ? 'text' : 'password'} value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="input-field pl-10 pr-10" placeholder="••••••••" required />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                'Create Account'
-              )}
+            <button type="submit" disabled={loading} className="btn-primary w-full flex items-center justify-center gap-2">
+              {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : 'Create Account'}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-400 mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-primary-400 hover:text-primary-300 font-medium">
-              Sign in
-            </Link>
+            <Link to="/login" className="text-primary-400 hover:text-primary-300 font-medium">Sign in</Link>
           </p>
         </div>
       </motion.div>
