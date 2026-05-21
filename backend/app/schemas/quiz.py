@@ -10,6 +10,8 @@ class QuizQuestionResponse(BaseModel):
     question_type: str
     options: Optional[List[str]] = None
     code_snippet: Optional[str] = None
+    correct_answer: Optional[str] = None
+    explanation: Optional[str] = None
     points: int
 
     class Config:

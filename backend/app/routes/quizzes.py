@@ -65,14 +65,14 @@ async def get_quizzes(
 
 @router.get("/{quiz_id}", response_model=QuizResponse)
 async def get_quiz(quiz_id: int, db: AsyncSession = Depends(get_db)):
-    """Get quiz with questions."""
+    """Get quiz with questions (correct answers included for review after submit)."""
     result = await db.execute(select(Quiz).where(Quiz.id == quiz_id, Quiz.is_published == True))
     quiz = result.scalar_one_or_none()
     
     if not quiz:
         raise HTTPException(status_code=404, detail="Quiz not found")
     
-    # Get questions (without correct answers)
+    # Get questions WITH correct answers (frontend handles hiding them during quiz)
     q_result = await db.execute(
         select(QuizQuestion).where(QuizQuestion.quiz_id == quiz_id).order_by(QuizQuestion.order_index)
     )
@@ -118,7 +118,7 @@ async def submit_quiz(
         if user_answer and str(user_answer).strip().lower() == str(q.correct_answer).strip().lower():
             score += q.points
     
-    passed = (score / total_points * 100) >= quiz.passing_score if total_points > 0 else False
+    passed = (score / total_points * 100) >= 75 if total_points > 0 else False
     
     # Save attempt
     attempt = QuizAttempt(
