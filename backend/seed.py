@@ -14,8 +14,15 @@ async def main():
     print("Seeding data...")
     async with AsyncSessionLocal() as session:
         try:
-            await seed_all(session)
-            print("App data seeded successfully!")
+            # Check if data already exists
+            from sqlalchemy import text
+            result = await session.execute(text("SELECT COUNT(*) FROM users"))
+            count = result.scalar()
+            if count > 0:
+                print("Data already exists, skipping seed.")
+            else:
+                await seed_all(session)
+                print("App data seeded successfully!")
         except Exception as e:
             print(f"Error seeding app data: {e}")
             await session.rollback()
@@ -26,7 +33,7 @@ async def main():
             await seed_playground_tables(session)
             print("Playground data seeded successfully!")
         except Exception as e:
-            print(f"Error seeding playground data: {e}")
+            print(f"Playground tables already exist or error: {e}")
             await session.rollback()
 
     print("Done!")

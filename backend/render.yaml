@@ -2,13 +2,13 @@ services:
   - type: web
     name: sqlmaster-api
     runtime: python
-    buildCommand: pip install -r requirements.txt && python seed.py
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install -r requirements.txt
+    startCommand: python seed.py && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
         value: sqlite+aiosqlite:///./sqlmaster.db
       - key: SECRET_KEY
         generateValue: true
       - key: CORS_ORIGINS
-        value: https://sqlmaster.vercel.app
+        value: https://sql-master-ten.vercel.app
     plan: free
