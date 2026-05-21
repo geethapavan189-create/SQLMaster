@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import { Database, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -10,7 +11,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -24,6 +25,16 @@ export default function Login() {
       toast.error(err.response?.data?.detail || 'Login failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      await googleLogin(credentialResponse.credential);
+      toast.success('Welcome!');
+      navigate('/dashboard');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Google login failed');
     }
   };
 
@@ -45,6 +56,28 @@ export default function Login() {
             </div>
             <h1 className="text-2xl font-display font-bold text-white">Welcome Back</h1>
             <p className="text-gray-400 mt-1">Sign in to continue learning</p>
+          </div>
+
+          {/* Google Login */}
+          <div className="mb-6">
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => toast.error('Google login failed')}
+                theme="filled_black"
+                shape="pill"
+                size="large"
+                width="100%"
+                text="signin_with"
+              />
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex-1 h-px bg-dark-700"></div>
+            <span className="text-xs text-gray-500 uppercase">or continue with email</span>
+            <div className="flex-1 h-px bg-dark-700"></div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

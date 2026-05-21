@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './context/AuthContext';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -23,8 +24,11 @@ import InterviewPrep from './pages/InterviewPrep';
 import Roadmap from './pages/Roadmap';
 import AdminPanel from './pages/AdminPanel';
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+
 export default function App() {
   return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
     <AuthProvider>
       <Router>
         <Toaster
@@ -69,5 +73,6 @@ export default function App() {
         </Routes>
       </Router>
     </AuthProvider>
+    </GoogleOAuthProvider>
   );
 }
