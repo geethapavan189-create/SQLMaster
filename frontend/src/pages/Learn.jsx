@@ -24,6 +24,33 @@ export default function Learn() {
       setLessons(res.data);
     } catch (err) {
       console.error('Failed to load lessons:', err);
+      // Fallback static data when API is unavailable
+      setLessons([
+        { id: 1, title: "Introduction to Databases", slug: "introduction-to-databases", description: "Understand what databases are and why they matter.", difficulty: "beginner", category: "Getting Started", order_index: 1, estimated_time: 15, is_completed: false },
+        { id: 2, title: "What is SQL?", slug: "what-is-sql", description: "Learn about SQL — the language for databases.", difficulty: "beginner", category: "Getting Started", order_index: 2, estimated_time: 12, is_completed: false },
+        { id: 3, title: "SQL SELECT Statement", slug: "sql-select", description: "Master the most important SQL command.", difficulty: "beginner", category: "Querying Data", order_index: 3, estimated_time: 20, is_completed: false },
+        { id: 4, title: "SQL WHERE Clause", slug: "sql-where", description: "Filter data using conditions.", difficulty: "beginner", category: "Querying Data", order_index: 4, estimated_time: 25, is_completed: false },
+        { id: 5, title: "SQL ORDER BY", slug: "sql-order-by", description: "Sort your query results.", difficulty: "beginner", category: "Querying Data", order_index: 5, estimated_time: 12, is_completed: false },
+        { id: 6, title: "SQL LIMIT & OFFSET", slug: "sql-limit-offset", description: "Control how many rows are returned.", difficulty: "beginner", category: "Querying Data", order_index: 6, estimated_time: 10, is_completed: false },
+        { id: 7, title: "SQL INSERT INTO", slug: "sql-insert", description: "Add new records to tables.", difficulty: "beginner", category: "Modifying Data", order_index: 7, estimated_time: 15, is_completed: false },
+        { id: 8, title: "SQL UPDATE Statement", slug: "sql-update", description: "Modify existing records.", difficulty: "beginner", category: "Modifying Data", order_index: 8, estimated_time: 15, is_completed: false },
+        { id: 9, title: "SQL DELETE Statement", slug: "sql-delete", description: "Remove records safely.", difficulty: "beginner", category: "Modifying Data", order_index: 9, estimated_time: 12, is_completed: false },
+        { id: 10, title: "SQL NULL Values", slug: "sql-null-values", description: "Handle missing data.", difficulty: "beginner", category: "Querying Data", order_index: 10, estimated_time: 10, is_completed: false },
+        { id: 11, title: "SQL Operators", slug: "sql-operators", description: "All SQL operators explained.", difficulty: "beginner", category: "Querying Data", order_index: 11, estimated_time: 15, is_completed: false },
+        { id: 12, title: "SQL Aggregate Functions", slug: "sql-aggregate-functions", description: "COUNT, SUM, AVG, MIN, MAX.", difficulty: "beginner", category: "Aggregation", order_index: 12, estimated_time: 18, is_completed: false },
+        { id: 13, title: "SQL GROUP BY", slug: "sql-group-by", description: "Group rows and summarize data.", difficulty: "intermediate", category: "Aggregation", order_index: 13, estimated_time: 22, is_completed: false },
+        { id: 14, title: "SQL HAVING Clause", slug: "sql-having", description: "Filter groups after aggregation.", difficulty: "intermediate", category: "Aggregation", order_index: 14, estimated_time: 12, is_completed: false },
+        { id: 15, title: "SQL INNER JOIN", slug: "sql-inner-join", description: "Combine data from multiple tables.", difficulty: "intermediate", category: "Joins", order_index: 15, estimated_time: 25, is_completed: false },
+        { id: 16, title: "SQL LEFT JOIN", slug: "sql-left-join", description: "Get all rows from the left table.", difficulty: "intermediate", category: "Joins", order_index: 16, estimated_time: 18, is_completed: false },
+        { id: 17, title: "SQL Subqueries", slug: "sql-subqueries", description: "Nest queries inside other queries.", difficulty: "intermediate", category: "Advanced Queries", order_index: 17, estimated_time: 25, is_completed: false },
+        { id: 18, title: "SQL UNION", slug: "sql-union", description: "Combine results from multiple queries.", difficulty: "intermediate", category: "Advanced Queries", order_index: 18, estimated_time: 12, is_completed: false },
+        { id: 19, title: "SQL CASE Expression", slug: "sql-case", description: "Add conditional logic to queries.", difficulty: "intermediate", category: "Advanced Queries", order_index: 19, estimated_time: 15, is_completed: false },
+        { id: 20, title: "SQL Window Functions", slug: "sql-window-functions", description: "Advanced analytical functions.", difficulty: "advanced", category: "Window Functions", order_index: 20, estimated_time: 35, is_completed: false },
+        { id: 21, title: "Common Table Expressions", slug: "sql-cte", description: "Write cleaner queries with CTEs.", difficulty: "advanced", category: "Advanced SQL", order_index: 21, estimated_time: 20, is_completed: false },
+        { id: 22, title: "SQL Indexes & Performance", slug: "sql-indexes", description: "Speed up your queries.", difficulty: "advanced", category: "Performance", order_index: 22, estimated_time: 25, is_completed: false },
+        { id: 23, title: "SQL Transactions", slug: "sql-transactions", description: "Ensure data integrity.", difficulty: "advanced", category: "Advanced SQL", order_index: 23, estimated_time: 20, is_completed: false },
+        { id: 24, title: "SQL Views", slug: "sql-views", description: "Create virtual tables.", difficulty: "intermediate", category: "Database Objects", order_index: 24, estimated_time: 15, is_completed: false },
+      ]);
     } finally {
       setLoading(false);
     }

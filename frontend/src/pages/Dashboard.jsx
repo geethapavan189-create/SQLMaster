@@ -21,6 +21,8 @@ export default function Dashboard() {
       setProgress(res.data);
     } catch (err) {
       console.error('Failed to load progress:', err);
+      // Fallback
+      setProgress({ lessons_completed: 0, problems_solved: 0, total_xp: 0, current_streak: 0, longest_streak: 0, level: 1 });
     } finally {
       setLoading(false);
     }
