@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { lessonAPI } from '../services/api';
 import DifficultyBadge from '../components/DifficultyBadge';
 import { CardSkeleton } from '../components/LoadingSkeleton';
-import AdBanner from '../components/AdBanner';
 import { BookOpen, Clock, CheckCircle, ChevronRight, Map, Filter } from 'lucide-react';
 
 export default function Learn() {
@@ -135,9 +134,6 @@ export default function Learn() {
             />
           </div>
         </div>
-
-        {/* Ad */}
-        <AdBanner slot="auto" />
       </motion.div>
 
       {loading ? (

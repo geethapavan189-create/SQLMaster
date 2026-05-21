@@ -13,7 +13,6 @@ export function AuthProvider({ children }) {
     
     if (token && savedUser) {
       setUser(JSON.parse(savedUser));
-      // Verify token is still valid
       authAPI.getMe()
         .then(res => {
           setUser(res.data);
@@ -32,15 +31,6 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const res = await authAPI.login({ email, password });
-    const { access_token, user: userData } = res.data;
-    localStorage.setItem('token', access_token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
-    return userData;
-  };
-
-  const googleLogin = async (credential) => {
-    const res = await authAPI.googleLogin({ token: credential });
     const { access_token, user: userData } = res.data;
     localStorage.setItem('token', access_token);
     localStorage.setItem('user', JSON.stringify(userData));
@@ -69,7 +59,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, googleLogin, register, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
