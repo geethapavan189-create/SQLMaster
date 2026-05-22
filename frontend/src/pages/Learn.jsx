@@ -1,21 +1,31 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { lessonAPI } from '../services/api';
+import { lessonAPI, quizAPI } from '../services/api';
 import DifficultyBadge from '../components/DifficultyBadge';
 import { CardSkeleton } from '../components/LoadingSkeleton';
 import AdBanner from '../components/AdBanner';
-import { BookOpen, Clock, CheckCircle, ChevronRight, Map, Filter } from 'lucide-react';
+import { BookOpen, Clock, CheckCircle, ChevronRight, Map, HelpCircle, Trophy, Lock } from 'lucide-react';
 
 export default function Learn() {
   const [lessons, setLessons] = useState([]);
+  const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
-  const [view, setView] = useState('roadmap'); // 'roadmap' or 'list'
 
   useEffect(() => {
     loadLessons();
+    loadQuizzes();
   }, [filter]);
+
+  const loadQuizzes = async () => {
+    try {
+      const res = await quizAPI.getAll();
+      setQuizzes(res.data);
+    } catch (err) {
+      setQuizzes([]);
+    }
+  };
 
   const loadLessons = async () => {
     try {
@@ -66,6 +76,25 @@ export default function Learn() {
   }, {});
 
   const totalCompleted = lessons.filter(l => l.is_completed).length;
+
+  // Map category names to quiz categories
+  const categoryToQuiz = {
+    'Getting Started': 'Getting Started',
+    'Querying Data': 'Querying Data',
+    'Modifying Data': 'Modifying Data',
+    'Aggregation': 'Aggregation',
+    'Joins': 'Joins',
+    'Advanced Queries': 'Advanced',
+    'Window Functions': 'Advanced',
+    'Advanced SQL': 'Advanced',
+    'Performance': 'Advanced',
+    'Database Objects': 'Advanced',
+  };
+
+  const getQuizForCategory = (category) => {
+    const quizCategory = categoryToQuiz[category];
+    return quizzes.find(q => q.category === quizCategory);
+  };
 
   // Find next uncompleted lesson
   const nextLesson = lessons.find(l => !l.is_completed);
@@ -186,6 +215,65 @@ export default function Learn() {
                   </Link>
                 ))}
               </div>
+
+              {/* Chapter Quiz Card */}
+              {(() => {
+                const quiz = getQuizForCategory(category);
+                if (!quiz) return null;
+                const allCompleted = categoryLessons.every(l => l.is_completed);
+                const quizPassed = quiz.best_score !== null && quiz.best_score >= 75;
+                return (
+                  <div className="mt-4">
+                    {allCompleted || quizPassed ? (
+                      <Link
+                        to={`/quizzes/${quiz.id}`}
+                        className={`block glass-card p-5 border-2 transition-all group ${
+                          quizPassed
+                            ? 'border-green-500/30 bg-green-500/5'
+                            : 'border-primary-500/30 bg-primary-500/5 hover:border-primary-500/50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                              quizPassed ? 'bg-green-500/20' : 'bg-primary-500/20'
+                            }`}>
+                              {quizPassed ? <Trophy size={24} className="text-green-400" /> : <HelpCircle size={24} className="text-primary-400" />}
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 mb-0.5">Chapter Quiz</div>
+                              <div className="font-semibold text-white group-hover:text-primary-300 transition-colors">
+                                {quiz.title}
+                              </div>
+                              <div className="text-xs text-gray-400 mt-0.5">
+                                {quiz.question_count} questions • 75% to pass
+                                {quizPassed && <span className="text-green-400 ml-2">✓ Passed ({quiz.best_score}%)</span>}
+                              </div>
+                            </div>
+                          </div>
+                          <ChevronRight size={20} className="text-gray-500 group-hover:text-primary-400 transition-colors" />
+                        </div>
+                      </Link>
+                    ) : (
+                      <div className="glass-card p-5 border-2 border-dark-700 opacity-60">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-dark-700 rounded-xl flex items-center justify-center">
+                              <Lock size={24} className="text-gray-500" />
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 mb-0.5">Chapter Quiz (Locked)</div>
+                              <div className="font-semibold text-gray-400">{quiz.title}</div>
+                              <div className="text-xs text-gray-500 mt-0.5">Complete all lessons above to unlock</div>
+                            </div>
+                          </div>
+                          <Lock size={16} className="text-gray-600" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </motion.div>
           ))}
         </div>
