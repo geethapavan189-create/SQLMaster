@@ -228,17 +228,118 @@ export default function LessonDetail() {
 
   const renderContent = (content) => {
     if (!content) return null;
-    return content.split('\n').map((line, i) => {
-      if (line.startsWith('# ')) return <h1 key={i} className="text-2xl font-display font-bold text-white mt-8 mb-4">{line.slice(2)}</h1>;
-      if (line.startsWith('## ')) return <h2 key={i} className="text-xl font-display font-bold text-white mt-6 mb-3 pb-2 border-b border-dark-700">{line.slice(3)}</h2>;
-      if (line.startsWith('### ')) return <h3 key={i} className="text-lg font-semibold text-white mt-4 mb-2">{line.slice(4)}</h3>;
-      if (line.startsWith('```')) return null;
-      if (line.startsWith('- ') || line.startsWith('* ')) return <li key={i} className="text-gray-300 ml-4 flex items-start gap-2"><span className="text-primary-400 mt-1">●</span>{line.slice(2)}</li>;
-      if (line.startsWith('> ')) return <blockquote key={i} className="border-l-4 border-primary-500 bg-primary-500/5 px-4 py-2 my-2 rounded-r-lg text-gray-200 italic">{line.slice(2)}</blockquote>;
-      if (line.trim() === '') return <div key={i} className="h-2" />;
-      if (line.startsWith('|')) return null; // Skip table rows (simplified)
-      return <p key={i} className="text-gray-300 leading-relaxed my-1">{line}</p>;
-    });
+    const lines = content.split('\n');
+    const elements = [];
+    let i = 0;
+    let inCodeBlock = false;
+    let codeLines = [];
+
+    while (i < lines.length) {
+      const line = lines[i];
+
+      // Code block start/end
+      if (line.trim().startsWith('```')) {
+        if (inCodeBlock) {
+          elements.push(
+            <pre key={`code-${i}`} className="bg-dark-900 border border-dark-700 rounded-lg p-4 my-4 overflow-x-auto">
+              <code className="text-sm font-mono text-accent-400">{codeLines.join('\n')}</code>
+            </pre>
+          );
+          codeLines = [];
+          inCodeBlock = false;
+        } else {
+          inCodeBlock = true;
+        }
+        i++;
+        continue;
+      }
+      if (inCodeBlock) { codeLines.push(line); i++; continue; }
+
+      // Table detection
+      if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+        const tableRows = [];
+        while (i < lines.length && lines[i].trim().startsWith('|')) {
+          const row = lines[i];
+          if (!row.match(/^\|[\s\-:|]+\|$/)) {
+            tableRows.push(row.split('|').filter(c => c.trim() !== '').map(c => c.trim()));
+          }
+          i++;
+        }
+        if (tableRows.length > 0) {
+          const header = tableRows[0];
+          const body = tableRows.slice(1);
+          elements.push(
+            <div key={`table-${i}`} className="overflow-x-auto my-4 rounded-lg border border-dark-700">
+              <table className="w-full text-sm">
+                <thead><tr className="bg-dark-800">{header.map((h, j) => <th key={j} className="text-left px-4 py-2.5 text-gray-200 font-semibold border-b border-dark-700">{renderInline(h)}</th>)}</tr></thead>
+                <tbody>{body.map((row, ri) => <tr key={ri} className="border-b border-dark-800 hover:bg-dark-800/30">{row.map((cell, ci) => <td key={ci} className="px-4 py-2 text-gray-300">{renderInline(cell)}</td>)}</tr>)}</tbody>
+              </table>
+            </div>
+          );
+        }
+        continue;
+      }
+
+      // Headers
+      if (line.startsWith('# ')) { elements.push(<h1 key={i} className="text-2xl font-display font-bold text-white mt-8 mb-4">{renderInline(line.slice(2))}</h1>); i++; continue; }
+      if (line.startsWith('## ')) { elements.push(<h2 key={i} className="text-xl font-display font-bold text-white mt-8 mb-3 pb-2 border-b border-dark-700">{renderInline(line.slice(3))}</h2>); i++; continue; }
+      if (line.startsWith('### ')) { elements.push(<h3 key={i} className="text-lg font-display font-semibold text-gray-100 mt-5 mb-2">{renderInline(line.slice(4))}</h3>); i++; continue; }
+
+      // Blockquote
+      if (line.startsWith('> ')) { elements.push(<blockquote key={i} className="border-l-4 border-primary-500 bg-primary-500/5 px-4 py-3 my-3 rounded-r-lg"><p className="text-gray-200 italic">{renderInline(line.slice(2))}</p></blockquote>); i++; continue; }
+
+      // List items
+      if (line.match(/^[-*] /)) {
+        const items = [];
+        while (i < lines.length && lines[i].match(/^[-*] /)) { items.push(lines[i].replace(/^[-*] /, '')); i++; }
+        elements.push(<ul key={`ul-${i}`} className="my-3 space-y-2 pl-2">{items.map((item, j) => <li key={j} className="flex items-start gap-2 text-gray-300"><span className="text-primary-400 mt-1.5 text-xs flex-shrink-0">●</span><span>{renderInline(item)}</span></li>)}</ul>);
+        continue;
+      }
+      if (line.match(/^\d+\. /)) {
+        const items = [];
+        while (i < lines.length && lines[i].match(/^\d+\. /)) { items.push(lines[i].replace(/^\d+\. /, '')); i++; }
+        elements.push(<ol key={`ol-${i}`} className="my-3 space-y-2 pl-2">{items.map((item, j) => <li key={j} className="flex items-start gap-3 text-gray-300"><span className="text-primary-400 font-bold text-sm min-w-[20px] flex-shrink-0">{j+1}.</span><span>{renderInline(item)}</span></li>)}</ol>);
+        continue;
+      }
+
+      // Empty line
+      if (line.trim() === '') { i++; continue; }
+
+      // Regular paragraph
+      elements.push(<p key={i} className="text-gray-300 leading-relaxed my-2">{renderInline(line)}</p>);
+      i++;
+    }
+    return elements;
+  };
+
+  const renderInline = (text) => {
+    if (!text) return text;
+    // Process inline formatting: **bold**, `code`, *italic*
+    const parts = [];
+    const regex = /(\*\*(.+?)\*\*|`([^`]+)`|\*([^*]+)\*)/g;
+    let lastIndex = 0;
+    let match;
+    let key = 0;
+
+    while ((match = regex.exec(text)) !== null) {
+      // Add text before match
+      if (match.index > lastIndex) {
+        parts.push(<span key={key++}>{text.slice(lastIndex, match.index)}</span>);
+      }
+      if (match[2]) { // **bold**
+        parts.push(<strong key={key++} className="text-white font-semibold">{match[2]}</strong>);
+      } else if (match[3]) { // `code`
+        parts.push(<code key={key++} className="bg-dark-900 text-accent-400 px-1.5 py-0.5 rounded text-sm font-mono border border-dark-700">{match[3]}</code>);
+      } else if (match[4]) { // *italic*
+        parts.push(<em key={key++} className="text-gray-200 italic">{match[4]}</em>);
+      }
+      lastIndex = match.index + match[0].length;
+    }
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(<span key={key++}>{text.slice(lastIndex)}</span>);
+    }
+    return parts.length === 0 ? text : parts;
   };
 
   if (loading) return <div className="max-w-4xl mx-auto px-4 py-8"><PageSkeleton /></div>;
