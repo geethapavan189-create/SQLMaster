@@ -158,6 +158,26 @@ export default function LessonDetail() {
   const nextLesson = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
   const moduleTest = moduleQuizzes[slug] || defaultModuleQuiz;
 
+  // Check if this lesson is locked (previous lesson not completed)
+  const isLocked = currentIndex > 0 && allLessons[currentIndex - 1] && !allLessons[currentIndex - 1].is_completed;
+
+  if (!loading && allLessons.length > 0 && isLocked) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+        <div className="glass-card p-10">
+          <Lock size={48} className="mx-auto text-gray-500 mb-4" />
+          <h2 className="text-2xl font-display font-bold text-white mb-2">Lesson Locked</h2>
+          <p className="text-gray-400 mb-6">
+            You need to complete <strong className="text-white">"{prevLesson?.title}"</strong> and pass its module test before accessing this lesson.
+          </p>
+          <Link to={`/learn/${prevLesson?.slug}`} className="btn-primary inline-flex items-center gap-2">
+            <ChevronLeft size={16} /> Go to Previous Lesson
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const runCode = async (problemIdx) => {
     const code = codeAnswers[problemIdx];
     if (!code?.trim()) { toast.error('Write a query first'); return; }

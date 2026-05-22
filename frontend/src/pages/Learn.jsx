@@ -77,6 +77,13 @@ export default function Learn() {
 
   const totalCompleted = lessons.filter(l => l.is_completed).length;
 
+  // Check if a lesson is unlocked (first lesson always unlocked, others need previous completed)
+  const isLessonUnlocked = (lessonIndex) => {
+    if (lessonIndex === 0) return true;
+    // Previous lesson must be completed
+    return lessons[lessonIndex - 1]?.is_completed === true;
+  };
+
   // Map category names to quiz categories
   const categoryToQuiz = {
     'Getting Started': 'Getting Started',
@@ -187,33 +194,36 @@ export default function Learn() {
                 </span>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {categoryLessons.map((lesson) => (
-                  <Link
-                    key={lesson.id}
-                    to={`/learn/${lesson.slug}`}
-                    className="glass-card p-5 hover:border-primary-500/50 transition-all duration-300 group relative overflow-hidden"
-                  >
-                    {lesson.is_completed && (
-                      <div className="absolute top-3 right-3">
-                        <CheckCircle size={18} className="text-green-400" />
+                {categoryLessons.map((lesson) => {
+                  const globalIndex = lessons.findIndex(l => l.id === lesson.id);
+                  const unlocked = isLessonUnlocked(globalIndex);
+                  
+                  if (!unlocked) {
+                    return (
+                      <div key={lesson.id} className="glass-card p-5 opacity-50 cursor-not-allowed relative overflow-hidden">
+                        <div className="absolute top-3 right-3"><Lock size={16} className="text-gray-600" /></div>
+                        <div className="flex items-center gap-2 mb-3"><DifficultyBadge difficulty={lesson.difficulty} /></div>
+                        <h3 className="font-semibold text-gray-500 mb-2 pr-6">{lesson.title}</h3>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{lesson.description}</p>
+                        <div className="text-xs text-gray-600 flex items-center gap-1"><Lock size={10} /> Complete previous lesson to unlock</div>
                       </div>
-                    )}
-                    <div className="flex items-center gap-2 mb-3">
-                      <DifficultyBadge difficulty={lesson.difficulty} />
-                    </div>
-                    <h3 className="font-semibold text-white group-hover:text-primary-300 transition-colors mb-2 pr-6">
-                      {lesson.title}
-                    </h3>
-                    <p className="text-sm text-gray-400 mb-3 line-clamp-2">{lesson.description}</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <Clock size={12} />
-                        {lesson.estimated_time} min
+                    );
+                  }
+
+                  return (
+                    <Link key={lesson.id} to={`/learn/${lesson.slug}`}
+                      className="glass-card p-5 hover:border-primary-500/50 transition-all duration-300 group relative overflow-hidden">
+                      {lesson.is_completed && <div className="absolute top-3 right-3"><CheckCircle size={18} className="text-green-400" /></div>}
+                      <div className="flex items-center gap-2 mb-3"><DifficultyBadge difficulty={lesson.difficulty} /></div>
+                      <h3 className="font-semibold text-white group-hover:text-primary-300 transition-colors mb-2 pr-6">{lesson.title}</h3>
+                      <p className="text-sm text-gray-400 mb-3 line-clamp-2">{lesson.description}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1 text-xs text-gray-500"><Clock size={12} />{lesson.estimated_time} min</div>
+                        <ChevronRight size={16} className="text-gray-500 group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
                       </div>
-                      <ChevronRight size={16} className="text-gray-500 group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  );
+                })}
               </div>
 
               {/* Chapter Quiz Card */}
