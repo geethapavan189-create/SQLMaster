@@ -1,10 +1,30 @@
 """Seed playground sample data tables."""
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
+from app.core.config import settings
+
+
+def get_insert_prefix():
+    """Return the correct INSERT syntax based on database type."""
+    if "sqlite" in settings.DATABASE_URL:
+        return "INSERT"
+    return "INSERT"
 
 
 async def seed_playground_tables(db: AsyncSession):
     """Create and populate sample tables for the SQL playground."""
+    is_postgres = "postgresql" in settings.DATABASE_URL
+    
+    # For PostgreSQL, check if tables already have data
+    if is_postgres:
+        try:
+            result = await db.execute(text("SELECT COUNT(*) FROM employees"))
+            count = result.scalar()
+            if count and count > 0:
+                print("Playground tables already seeded.")
+                return
+        except:
+            pass  # Table doesn't exist yet, continue
 
     # Create employees table
     await db.execute(text("""
@@ -101,7 +121,7 @@ async def seed_playground_tables(db: AsyncSession):
 
     # Seed departments
     await db.execute(text("""
-        INSERT OR IGNORE INTO departments (id, name, location, budget) VALUES
+        INSERT INTO departments (id, name, location, budget) VALUES
         (1, 'Engineering', 'San Francisco', 2000000),
         (2, 'Marketing', 'New York', 800000),
         (3, 'Sales', 'Chicago', 1200000),
@@ -114,7 +134,7 @@ async def seed_playground_tables(db: AsyncSession):
 
     # Seed employees
     await db.execute(text("""
-        INSERT OR IGNORE INTO employees (id, first_name, last_name, email, department_id, salary, hire_date, job_title, manager_id) VALUES
+        INSERT INTO employees (id, first_name, last_name, email, department_id, salary, hire_date, job_title, manager_id) VALUES
         (1, 'John', 'Smith', 'john.smith@company.com', 1, 95000, '2019-03-15', 'Senior Engineer', NULL),
         (2, 'Sarah', 'Johnson', 'sarah.j@company.com', 1, 105000, '2018-07-01', 'Tech Lead', 1),
         (3, 'Michael', 'Williams', 'michael.w@company.com', 1, 82000, '2020-01-10', 'Software Engineer', 2),
@@ -144,7 +164,7 @@ async def seed_playground_tables(db: AsyncSession):
 
     # Seed customers
     await db.execute(text("""
-        INSERT OR IGNORE INTO customers (id, name, email, city, country, joined_date) VALUES
+        INSERT INTO customers (id, name, email, city, country, joined_date) VALUES
         (1, 'Alice Cooper', 'alice@email.com', 'New York', 'USA', '2022-01-15'),
         (2, 'Bob Martinez', 'bob@email.com', 'Los Angeles', 'USA', '2022-03-20'),
         (3, 'Carol White', 'carol@email.com', 'London', 'UK', '2022-02-10'),
@@ -159,7 +179,7 @@ async def seed_playground_tables(db: AsyncSession):
 
     # Seed orders
     await db.execute(text("""
-        INSERT OR IGNORE INTO orders (id, customer_id, order_date, total_amount, status) VALUES
+        INSERT INTO orders (id, customer_id, order_date, total_amount, status) VALUES
         (1, 1, '2024-01-05', 150.00, 'completed'),
         (2, 1, '2024-02-10', 89.99, 'completed'),
         (3, 2, '2024-01-15', 250.00, 'completed'),
@@ -179,7 +199,7 @@ async def seed_playground_tables(db: AsyncSession):
 
     # Seed products
     await db.execute(text("""
-        INSERT OR IGNORE INTO products (id, name, category, price, stock) VALUES
+        INSERT INTO products (id, name, category, price, stock) VALUES
         (1, 'Laptop Pro 15', 'Electronics', 1299.99, 50),
         (2, 'Wireless Mouse', 'Electronics', 29.99, 200),
         (3, 'USB-C Hub', 'Electronics', 49.99, 150),
@@ -196,7 +216,7 @@ async def seed_playground_tables(db: AsyncSession):
 
     # Seed students
     await db.execute(text("""
-        INSERT OR IGNORE INTO students (id, name, email, major, gpa, enrollment_year) VALUES
+        INSERT INTO students (id, name, email, major, gpa, enrollment_year) VALUES
         (1, 'Alex Johnson', 'alex@university.edu', 'Computer Science', 3.8, 2021),
         (2, 'Bella Smith', 'bella@university.edu', 'Mathematics', 3.5, 2020),
         (3, 'Charlie Brown', 'charlie@university.edu', 'Physics', 3.2, 2022),
@@ -209,7 +229,7 @@ async def seed_playground_tables(db: AsyncSession):
 
     # Seed courses
     await db.execute(text("""
-        INSERT OR IGNORE INTO courses (id, name, department, credits, instructor) VALUES
+        INSERT INTO courses (id, name, department, credits, instructor) VALUES
         (1, 'Intro to Programming', 'Computer Science', 4, 'Dr. Smith'),
         (2, 'Data Structures', 'Computer Science', 4, 'Dr. Johnson'),
         (3, 'Calculus I', 'Mathematics', 3, 'Prof. Williams'),

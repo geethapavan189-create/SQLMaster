@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "sqlite+aiosqlite:///./sqlmaster.db"
     
-    # For production with Supabase, set env var like:
+    # For Supabase PostgreSQL, set env var:
     # DATABASE_URL=postgresql+asyncpg://postgres:PASSWORD@db.xxx.supabase.co:5432/postgres
     
     # JWT
