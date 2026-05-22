@@ -78,10 +78,14 @@ export default function Learn() {
   const totalCompleted = lessons.filter(l => l.is_completed).length;
 
   // Check if a lesson is unlocked (first lesson always unlocked, others need previous completed)
-  const isLessonUnlocked = (lessonIndex) => {
-    if (lessonIndex === 0) return true;
-    // Previous lesson must be completed
-    return lessons[lessonIndex - 1]?.is_completed === true;
+  const isLessonUnlocked = (lesson) => {
+    const globalIndex = lessons.findIndex(l => l.id === lesson.id);
+    if (globalIndex === 0) return true;
+    // ALL previous lessons must be completed
+    for (let i = 0; i < globalIndex; i++) {
+      if (!lessons[i].is_completed) return false;
+    }
+    return true;
   };
 
   // Map category names to quiz categories
@@ -103,8 +107,8 @@ export default function Learn() {
     return quizzes.find(q => q.category === quizCategory);
   };
 
-  // Find next uncompleted lesson
-  const nextLesson = lessons.find(l => !l.is_completed);
+  // Find next lesson to work on (first uncompleted that is unlocked)
+  const nextLesson = lessons.find((l, i) => !l.is_completed && isLessonUnlocked(l));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -195,8 +199,7 @@ export default function Learn() {
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {categoryLessons.map((lesson) => {
-                  const globalIndex = lessons.findIndex(l => l.id === lesson.id);
-                  const unlocked = isLessonUnlocked(globalIndex);
+                  const unlocked = isLessonUnlocked(lesson);
                   
                   if (!unlocked) {
                     return (
@@ -205,7 +208,7 @@ export default function Learn() {
                         <div className="flex items-center gap-2 mb-3"><DifficultyBadge difficulty={lesson.difficulty} /></div>
                         <h3 className="font-semibold text-gray-500 mb-2 pr-6">{lesson.title}</h3>
                         <p className="text-sm text-gray-600 mb-3 line-clamp-2">{lesson.description}</p>
-                        <div className="text-xs text-gray-600 flex items-center gap-1"><Lock size={10} /> Complete previous lesson to unlock</div>
+                        <div className="text-xs text-gray-600 flex items-center gap-1"><Lock size={10} /> Complete previous lessons to unlock</div>
                       </div>
                     );
                   }
