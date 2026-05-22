@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Editor from '@monaco-editor/react';
 import { lessonAPI, playgroundAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { completeLesson, isLessonCompleted, isLessonUnlocked, getFirstLockedLesson } from '../hooks/useProgress';
 import DifficultyBadge from '../components/DifficultyBadge';
 import { PageSkeleton } from '../components/LoadingSkeleton';
 import {
@@ -124,13 +125,13 @@ export default function LessonDetail() {
   }, [slug]);
 
   const resetState = () => {
-    setCompleted(false);
+    setCompleted(isLessonCompleted(slug));
+    setTestPassed(isLessonCompleted(slug));
     setActiveTab('lesson');
     setQuizAnswers({});
     setCodeAnswers({});
     setCodeResults({});
     setTestSubmitted(false);
-    setTestPassed(false);
     setTestScore(0);
   };
 
@@ -159,10 +160,10 @@ export default function LessonDetail() {
   const moduleTest = moduleQuizzes[slug] || defaultModuleQuiz;
 
   // Check if this lesson is locked (ALL previous lessons must be completed)
-  const isLocked = currentIndex > 0 && allLessons.slice(0, currentIndex).some(l => !l.is_completed);
+  const isLocked = allLessons.length > 0 && !isLessonUnlocked(slug, allLessons);
 
   if (!loading && allLessons.length > 0 && isLocked) {
-    const firstIncomplete = allLessons.find(l => !l.is_completed);
+    const firstIncomplete = getFirstLockedLesson(allLessons);
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
         <div className="glass-card p-10">
@@ -216,11 +217,12 @@ export default function LessonDetail() {
     if (score >= 75) {
       setTestPassed(true);
       setCompleted(true);
-      if (user) {
-        try {
-          await lessonAPI.updateProgress(lesson.id, { is_completed: true });
-          toast.success(`Module passed! ${score}% — +20 XP 🎉`);
-        } catch (err) {}
+      // Save to localStorage - permanent!
+      completeLesson(slug);
+      toast.success(`Module passed! ${score}% — +20 XP 🎉`);
+      // Also try to save to backend (optional, won't break if fails)
+      if (user && lesson) {
+        try { await lessonAPI.updateProgress(lesson.id, { is_completed: true }); } catch (err) {}
       }
     } else {
       toast.error(`${score}% — You need 75% to pass. Try again!`);

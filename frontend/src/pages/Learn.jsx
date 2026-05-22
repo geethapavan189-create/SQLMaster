@@ -5,6 +5,7 @@ import { lessonAPI, quizAPI } from '../services/api';
 import DifficultyBadge from '../components/DifficultyBadge';
 import { CardSkeleton } from '../components/LoadingSkeleton';
 import AdBanner from '../components/AdBanner';
+import { isLessonCompleted, isLessonUnlocked, getUserProgress } from '../hooks/useProgress';
 import { BookOpen, Clock, CheckCircle, ChevronRight, Map, HelpCircle, Trophy, Lock } from 'lucide-react';
 
 export default function Learn() {
@@ -75,18 +76,10 @@ export default function Learn() {
     return acc;
   }, {});
 
-  const totalCompleted = lessons.filter(l => l.is_completed).length;
+  const totalCompleted = lessons.filter(l => isLessonCompleted(l.slug)).length;
 
-  // Check if a lesson is unlocked (first lesson always unlocked, others need previous completed)
-  const isLessonUnlocked = (lesson) => {
-    const globalIndex = lessons.findIndex(l => l.id === lesson.id);
-    if (globalIndex === 0) return true;
-    // ALL previous lessons must be completed
-    for (let i = 0; i < globalIndex; i++) {
-      if (!lessons[i].is_completed) return false;
-    }
-    return true;
-  };
+  // Check if a lesson is unlocked using localStorage progress
+  const checkUnlocked = (lesson) => isLessonUnlocked(lesson.slug, lessons);
 
   // Map category names to quiz categories
   const categoryToQuiz = {
@@ -108,7 +101,7 @@ export default function Learn() {
   };
 
   // Find next lesson to work on (first uncompleted that is unlocked)
-  const nextLesson = lessons.find((l, i) => !l.is_completed && isLessonUnlocked(l));
+  const nextLesson = lessons.find((l) => !isLessonCompleted(l.slug) && checkUnlocked(l));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -199,7 +192,8 @@ export default function Learn() {
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {categoryLessons.map((lesson) => {
-                  const unlocked = isLessonUnlocked(lesson);
+                  const unlocked = checkUnlocked(lesson);
+                  const completed = isLessonCompleted(lesson.slug);
                   
                   if (!unlocked) {
                     return (
@@ -216,7 +210,7 @@ export default function Learn() {
                   return (
                     <Link key={lesson.id} to={`/learn/${lesson.slug}`}
                       className="glass-card p-5 hover:border-primary-500/50 transition-all duration-300 group relative overflow-hidden">
-                      {lesson.is_completed && <div className="absolute top-3 right-3"><CheckCircle size={18} className="text-green-400" /></div>}
+                      {completed && <div className="absolute top-3 right-3"><CheckCircle size={18} className="text-green-400" /></div>}
                       <div className="flex items-center gap-2 mb-3"><DifficultyBadge difficulty={lesson.difficulty} /></div>
                       <h3 className="font-semibold text-white group-hover:text-primary-300 transition-colors mb-2 pr-6">{lesson.title}</h3>
                       <p className="text-sm text-gray-400 mb-3 line-clamp-2">{lesson.description}</p>
