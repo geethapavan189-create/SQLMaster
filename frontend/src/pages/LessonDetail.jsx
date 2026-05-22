@@ -224,7 +224,12 @@ export default function LessonDetail() {
       if (user && lesson) {
         try { await lessonAPI.updateProgress(lesson.id, { is_completed: true }); } catch (err) {}
       }
+      // Auto navigate to next lesson after 2 seconds
+      if (nextLesson) {
+        setTimeout(() => navigate(`/learn/${nextLesson.slug}`), 2000);
+      }
     } else {
+      setTestPassed(false);
       toast.error(`${score}% — You need 75% to pass. Try again!`);
     }
   };
@@ -511,7 +516,7 @@ export default function LessonDetail() {
             </Link>
           ) : <div />}
           {nextLesson ? (
-            testPassed || completed ? (
+            testPassed || completed || isLessonCompleted(slug) ? (
               <Link to={`/learn/${nextLesson.slug}`} className="flex items-center gap-2 text-primary-400 hover:text-primary-300 transition-colors group text-right">
                 <div><div className="text-xs text-gray-500">Next</div><div className="text-sm font-medium">{nextLesson.title}</div></div>
                 <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
