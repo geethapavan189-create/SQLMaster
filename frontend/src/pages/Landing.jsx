@@ -37,7 +37,7 @@ function HeroSection() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link to="/learn" className="btn-primary flex items-center justify-center gap-2">
+              <Link to="/courses" className="btn-primary flex items-center justify-center gap-2">
                 <BookOpen size={18} />
                 Start Learning
               </Link>

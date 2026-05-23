@@ -14,6 +14,7 @@ import Learn from './pages/Learn';
 import LessonDetail from './pages/LessonDetail';
 import PythonLearn from './pages/PythonLearn';
 import PythonLesson from './pages/PythonLesson';
+import PythonPlayground from './pages/PythonPlayground';
 import Playground from './pages/Playground';
 import Problems from './pages/Problems';
 import ProblemDetail from './pages/ProblemDetail';
@@ -53,6 +54,7 @@ export default function App() {
               <Route path="/learn/:slug" element={<LessonDetail />} />
               <Route path="/python" element={<PythonLearn />} />
               <Route path="/python/:slug" element={<PythonLesson />} />
+              <Route path="/python/playground" element={<PythonPlayground />} />
               <Route path="/roadmap" element={<Roadmap />} />
               <Route path="/playground" element={<Playground />} />
               <Route path="/problems" element={<Problems />} />
