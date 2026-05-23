@@ -8,9 +8,12 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Courses from './pages/Courses';
 import Dashboard from './pages/Dashboard';
 import Learn from './pages/Learn';
 import LessonDetail from './pages/LessonDetail';
+import PythonLearn from './pages/PythonLearn';
+import PythonLesson from './pages/PythonLesson';
 import Playground from './pages/Playground';
 import Problems from './pages/Problems';
 import ProblemDetail from './pages/ProblemDetail';
@@ -45,8 +48,11 @@ export default function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/courses" element={<Courses />} />
               <Route path="/learn" element={<Learn />} />
               <Route path="/learn/:slug" element={<LessonDetail />} />
+              <Route path="/python" element={<PythonLearn />} />
+              <Route path="/python/:slug" element={<PythonLesson />} />
               <Route path="/roadmap" element={<Roadmap />} />
               <Route path="/playground" element={<Playground />} />
               <Route path="/problems" element={<Problems />} />

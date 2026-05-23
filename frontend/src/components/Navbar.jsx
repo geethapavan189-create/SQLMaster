@@ -16,8 +16,9 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { to: '/learn', label: 'Learn', icon: BookOpen },
-    { to: '/roadmap', label: 'Roadmap', icon: Map },
+    { to: '/courses', label: 'Courses', icon: BookOpen },
+    { to: '/learn', label: 'SQL', icon: Database },
+    { to: '/python', label: 'Python', icon: Code2 },
     { to: '/playground', label: 'Playground', icon: Code2 },
     { to: '/problems', label: 'Problems', icon: Database },
     { to: '/leaderboard', label: 'Leaderboard', icon: Trophy },
