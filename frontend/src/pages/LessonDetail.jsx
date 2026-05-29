@@ -84,9 +84,63 @@ const moduleQuizzes = {
       { task: "Get employees 6-10 (page 2, 5 per page).", solution: "SELECT * FROM employees LIMIT 5 OFFSET 5", hint: "LIMIT 5 OFFSET 5" },
     ]
   },
+  'sql-null-values': {
+    questions: [
+      { q: "NULL in SQL means:", options: ["Zero", "Empty string", "Absence of any value", "False"], answer: 2 },
+      { q: "How do you check for NULL?", options: ["= NULL", "== NULL", "IS NULL", "EQUALS NULL"], answer: 2 },
+      { q: "What does COALESCE(phone, 'N/A') return if phone is NULL?", options: ["NULL", "phone", "'N/A'", "Error"], answer: 2 },
+    ],
+    codeProblems: [
+      { task: "Find employees where manager_id IS NULL.", solution: "SELECT * FROM employees WHERE manager_id IS NULL", hint: "Use IS NULL" },
+      { task: "Find employees where department_id IS NOT NULL.", solution: "SELECT * FROM employees WHERE department_id IS NOT NULL", hint: "Use IS NOT NULL" },
+    ]
+  },
+  'sql-operators': {
+    questions: [
+      { q: "BETWEEN 10 AND 50 is:", options: ["Exclusive", "Inclusive on both ends", "Only includes 10", "Only includes 50"], answer: 1 },
+      { q: "IN ('A','B','C') is shorthand for:", options: ["AND conditions", "OR conditions", "NOT conditions", "LIKE conditions"], answer: 1 },
+      { q: "LIKE '%son' matches:", options: ["Starts with son", "Ends with son", "Contains son", "Exactly son"], answer: 1 },
+    ],
+    codeProblems: [
+      { task: "Find employees with salary BETWEEN 60000 AND 90000.", solution: "SELECT * FROM employees WHERE salary BETWEEN 60000 AND 90000", hint: "Use BETWEEN low AND high" },
+      { task: "Find employees in department 1, 3, or 5.", solution: "SELECT * FROM employees WHERE department_id IN (1, 3, 5)", hint: "Use IN (values)" },
+    ]
+  },
+  'sql-insert': {
+    questions: [
+      { q: "INSERT INTO adds:", options: ["Columns", "New rows", "New tables", "Indexes"], answer: 1 },
+      { q: "Text values in INSERT need:", options: ["Double quotes", "Single quotes", "No quotes", "Backticks"], answer: 1 },
+      { q: "To insert multiple rows:", options: ["Multiple INSERT statements only", "VALUES (row1), (row2), (row3)", "Use BULK INSERT only", "Not possible"], answer: 1 },
+    ],
+    codeProblems: [
+      { task: "Select all products to see the table structure.", solution: "SELECT * FROM products", hint: "SELECT * FROM products" },
+      { task: "Count total number of customers.", solution: "SELECT COUNT(*) FROM customers", hint: "Use COUNT(*)" },
+    ]
+  },
+  'sql-update': {
+    questions: [
+      { q: "UPDATE without WHERE affects:", options: ["Nothing", "First row only", "ALL rows", "Error"], answer: 2 },
+      { q: "SET salary = salary * 1.1 means:", options: ["Set to 1.1", "10% raise", "Multiply by 11", "Error"], answer: 1 },
+      { q: "Best practice before UPDATE:", options: ["Just run it", "Run SELECT first to verify rows", "Delete then insert", "Use TRUNCATE"], answer: 1 },
+    ],
+    codeProblems: [
+      { task: "Select employees in department 1 to see who would be affected.", solution: "SELECT * FROM employees WHERE department_id = 1", hint: "SELECT with WHERE" },
+      { task: "Count employees with salary below 60000.", solution: "SELECT COUNT(*) FROM employees WHERE salary < 60000", hint: "COUNT with WHERE" },
+    ]
+  },
+  'sql-delete': {
+    questions: [
+      { q: "DELETE without WHERE:", options: ["Does nothing", "Deletes first row", "Deletes ALL rows", "Error"], answer: 2 },
+      { q: "DELETE vs TRUNCATE:", options: ["Same thing", "DELETE can use WHERE, TRUNCATE removes all", "TRUNCATE is slower", "DELETE removes table"], answer: 1 },
+      { q: "DELETE vs DROP:", options: ["Same thing", "DROP removes table structure too", "DELETE is permanent", "DROP is faster DELETE"], answer: 1 },
+    ],
+    codeProblems: [
+      { task: "Find all orders with status 'completed'.", solution: "SELECT * FROM orders WHERE status = 'completed'", hint: "WHERE status = 'completed'" },
+      { task: "Count orders by status.", solution: "SELECT status, COUNT(*) FROM orders GROUP BY status", hint: "GROUP BY status" },
+    ]
+  },
 };
 
-// Default quiz for lessons without specific questions
 const defaultModuleQuiz = {
   questions: [
     { q: "Did you understand the main concept of this lesson?", options: ["Yes, completely", "Mostly", "Need to review", "Not at all"], answer: 0 },
@@ -125,8 +179,9 @@ export default function LessonDetail() {
   }, [slug]);
 
   const resetState = () => {
-    setCompleted(isLessonCompleted(slug));
-    setTestPassed(isLessonCompleted(slug));
+    const alreadyCompleted = isLessonCompleted(slug);
+    setCompleted(alreadyCompleted);
+    setTestPassed(alreadyCompleted);
     setActiveTab('lesson');
     setQuizAnswers({});
     setCodeAnswers({});
@@ -439,7 +494,8 @@ export default function LessonDetail() {
                 <h3 className="text-xl font-bold text-white">{testPassed ? 'Module Passed!' : 'Not Passed'}</h3>
                 <p className="text-3xl font-bold gradient-text my-2">{testScore}%</p>
                 <p className="text-sm text-gray-400">{testPassed ? 'You can proceed to the next lesson.' : 'You need 75% to pass. Review and try again.'}</p>
-                {!testPassed && <button onClick={resetState} className="btn-primary mt-4 text-sm">Try Again</button>}
+                {!testPassed && <button onClick={() => { setTestSubmitted(false); setQuizAnswers({}); setCodeAnswers({}); setCodeResults({}); }} className="btn-primary mt-4 text-sm">Try Again</button>}
+                {testPassed && <button onClick={() => { setTestSubmitted(false); setQuizAnswers({}); setCodeAnswers({}); setCodeResults({}); }} className="btn-secondary mt-4 text-sm">Retake Test</button>}
               </motion.div>
             )}
 

@@ -657,7 +657,7 @@ LIMIT 1;
             "description": "Add new records to your database tables.",
             "difficulty": "beginner",
             "category": "Modifying Data",
-            "order_index": 7,
+            "order_index": 9,
             "estimated_time": 15,
             "content": """# INSERT INTO Statement
 
@@ -737,7 +737,7 @@ WHERE order_date < '2023-01-01';
             "description": "Modify existing records in your database.",
             "difficulty": "beginner",
             "category": "Modifying Data",
-            "order_index": 8,
+            "order_index": 10,
             "estimated_time": 15,
             "content": """# UPDATE Statement
 
@@ -835,7 +835,7 @@ UPDATE employees SET salary = salary * 1.10 WHERE department = 'Sales';
             "description": "Remove records from your database safely.",
             "difficulty": "beginner",
             "category": "Modifying Data",
-            "order_index": 9,
+            "order_index": 11,
             "estimated_time": 12,
             "content": """# DELETE Statement
 
@@ -921,7 +921,7 @@ DELETE FROM orders WHERE status = 'cancelled';
             "description": "Understand and handle NULL — the concept of missing or unknown data.",
             "difficulty": "beginner",
             "category": "Querying Data",
-            "order_index": 10,
+            "order_index": 7,
             "estimated_time": 10,
             "content": """# NULL Values
 
@@ -997,7 +997,7 @@ FROM stats;
             "description": "Learn all SQL operators — arithmetic, comparison, logical, and more.",
             "difficulty": "beginner",
             "category": "Querying Data",
-            "order_index": 11,
+            "order_index": 8,
             "estimated_time": 15,
             "content": """# SQL Operators
 
